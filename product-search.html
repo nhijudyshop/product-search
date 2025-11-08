@@ -690,6 +690,21 @@
         // Firebase sync flag to prevent loops
         let isSyncingFromFirebase = false;
 
+        // Clean product data for Firebase (remove invalid keys)
+        function cleanProductForFirebase(product) {
+            // Create a clean copy with only essential fields
+            const cleanProduct = {
+                Id: product.Id,
+                NameGet: product.NameGet,
+                QtyAvailable: product.QtyAvailable,
+                soldQty: product.soldQty || 0,
+                remainingQty: product.remainingQty || 0,
+                imageUrl: product.imageUrl || null,
+                ProductTmplId: product.ProductTmplId
+            };
+            return cleanProduct;
+        }
+
         // Authentication functions
         async function getAuthToken() {
             try {
@@ -974,19 +989,25 @@
                 const sold = parseInt(soldInput.value) || 0;
                 const remaining = Math.max(0, qtyAvailable - sold);
                 remainingDisplay.textContent = remaining;
-                
-                // Tự động cập nhật vào danh sách
+
+                // Tự động cập nhật vào danh sách - chỉ pass các field cần thiết
                 addProductToList({
-                    ...product,
+                    Id: product.Id,
+                    NameGet: product.NameGet,
+                    QtyAvailable: product.QtyAvailable,
+                    ProductTmplId: product.ProductTmplId,
                     imageUrl: imageUrl,
                     soldQty: sold,
                     remainingQty: remaining
                 }, false); // false = không hiển thị notification mỗi lần thay đổi
             });
 
-            // Tự động thêm vào danh sách ngay khi hiển thị
+            // Tự động thêm vào danh sách ngay khi hiển thị - chỉ pass các field cần thiết
             addProductToList({
-                ...product,
+                Id: product.Id,
+                NameGet: product.NameGet,
+                QtyAvailable: product.QtyAvailable,
+                ProductTmplId: product.ProductTmplId,
                 imageUrl: imageUrl,
                 soldQty: 0,
                 remainingQty: qtyAvailable
@@ -999,21 +1020,24 @@
 
         // Add product to list
         function addProductToList(product, showNotification = true) {
+            // Clean product data (chỉ giữ các field cần thiết)
+            const cleanProduct = cleanProductForFirebase(product);
+
             // Kiểm tra xem sản phẩm đã tồn tại chưa
-            const existingIndex = savedProducts.findIndex(p => p.Id === product.Id);
+            const existingIndex = savedProducts.findIndex(p => p.Id === cleanProduct.Id);
 
             if (existingIndex !== -1) {
                 // Cập nhật số lượng nếu đã tồn tại
-                savedProducts[existingIndex] = product;
+                savedProducts[existingIndex] = cleanProduct;
             } else {
                 // Thêm mới
-                savedProducts.push(product);
+                savedProducts.push(cleanProduct);
             }
 
             // Lưu vào localStorage (local cache)
             localStorage.setItem('savedProducts', JSON.stringify(savedProducts));
 
-            // Sync lên Firebase (chia sẻ giữa các máy)
+            // Sync lên Firebase (chia sẻ giữa các máy) - đã clean nên không có invalid keys
             if (!isSyncingFromFirebase) {
                 database.ref('savedProducts').set(savedProducts).catch(error => {
                     console.error('❌ Lỗi sync products lên Firebase:', error);
