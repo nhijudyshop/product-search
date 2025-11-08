@@ -361,7 +361,8 @@
         let displaySettings = {
             columns: 4,
             rows: 2,
-            gap: 15
+            gap: 15,
+            itemHeight: 500
         };
 
         // Load settings from localStorage
@@ -378,7 +379,7 @@
         function applySettings() {
             const productGrid = document.getElementById('productGrid');
             productGrid.style.gridTemplateColumns = `repeat(${displaySettings.columns}, 1fr)`;
-            productGrid.style.gridTemplateRows = `repeat(${displaySettings.rows}, 1fr)`;
+            productGrid.style.gridTemplateRows = `repeat(${displaySettings.rows}, ${displaySettings.itemHeight}px)`;
             productGrid.style.gap = `${displaySettings.gap}px`;
         }
 
