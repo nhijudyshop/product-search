@@ -702,7 +702,7 @@
         <div class="product-list-section" id="productListSection" style="display: none;">
             <div class="list-header">
                 <h2>📋 Danh sách sản phẩm đã thêm (<span id="productCount">0</span>)</h2>
-                <a href="product-list.html#admin" class="btn-expand" id="btnExpandList" target="_blank" style="text-decoration: none; display: inline-block;">🔍 Phóng to</a>
+                <a href="product-list.html#sync" class="btn-expand" id="btnExpandList" target="_blank" style="text-decoration: none; display: inline-block;">🔍 Phóng to</a>
             </div>
             <div class="product-list-preview" id="productListPreview"></div>
         </div>
@@ -715,7 +715,7 @@
         let bearerToken = null;
         let tokenExpiry = null;
         let savedProducts = []; // Danh sách sản phẩm đã thêm
-        let isAdminMode = false; // Admin mode flag
+        let isSyncMode = false; // Sync mode flag
 
         // Firebase Configuration
         const firebaseConfig = {
@@ -736,19 +736,20 @@
         // Firebase sync flag to prevent loops
         let isSyncingFromFirebase = false;
 
-        // Parse hash to detect admin mode
-        function checkAdminMode() {
+        // Parse hash to detect sync mode
+        function checkSyncMode() {
             const hash = window.location.hash.substring(1);
-            isAdminMode = hash.includes('admin');
+            // Support both 'sync' and legacy 'admin' for backward compatibility
+            isSyncMode = hash.includes('sync') || hash.includes('admin');
             updateExpandListLink();
         }
 
-        // Update "Phóng to" link with current admin mode
+        // Update "Phóng to" link with current sync mode
         function updateExpandListLink() {
             const btnExpandList = document.getElementById('btnExpandList');
             if (btnExpandList) {
-                if (isAdminMode) {
-                    btnExpandList.href = 'product-list.html#admin';
+                if (isSyncMode) {
+                    btnExpandList.href = 'product-list.html#sync';
                 } else {
                     btnExpandList.href = 'product-list.html';
                 }
@@ -1396,8 +1397,8 @@
 
         // Pre-load Excel data on page load
         window.addEventListener('load', async () => {
-            // Check admin mode from URL hash
-            checkAdminMode();
+            // Check sync mode from URL hash
+            checkSyncMode();
 
             // Lấy token trước khi load data
             try {
@@ -1425,7 +1426,7 @@
 
         // Listen for hash changes
         window.addEventListener('hashchange', () => {
-            checkAdminMode();
+            checkSyncMode();
         });
 
 
