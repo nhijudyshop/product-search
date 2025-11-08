@@ -72,16 +72,16 @@
 
         .btn-refresh {
             position: absolute;
-            top: 8px;
-            right: 8px;
+            top: 4px;
+            left: 4px;
             background: rgba(255, 255, 255, 0.95);
             color: #667eea;
-            border: 2px solid #667eea;
-            width: 32px;
-            height: 32px;
+            border: 2px solid #2196f3;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -93,7 +93,7 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
-        .grid-item:hover .btn-refresh,
+        .grid-stat-total:hover .btn-refresh,
         .btn-refresh:hover {
             opacity: 1;
             visibility: visible;
@@ -101,10 +101,10 @@
         }
 
         .btn-refresh:hover {
-            background: #667eea;
+            background: #2196f3;
             color: white;
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
         }
 
         .btn-refresh:active {
@@ -115,7 +115,7 @@
             animation: spin 1s linear infinite;
             pointer-events: none;
             opacity: 1;
-            background: #667eea;
+            background: #2196f3;
             color: white;
         }
 
@@ -196,6 +196,7 @@
         .grid-stat-total {
             background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
             border-color: #2196f3;
+            position: relative;
         }
 
         .grid-stat-sold {
@@ -855,11 +856,11 @@
 
                 return `
                     <div class="grid-item" data-product-id="${product.Id}">
-                        <button class="btn-refresh" onclick="refreshProduct(${product.Id})" title="Cập nhật từ TPOS">🔄</button>
                         ${imageHtml}
                         <div class="grid-item-name">${product.NameGet}</div>
                         <div class="grid-item-stats">
                             <div class="grid-stat grid-stat-total">
+                                <button class="btn-refresh" onclick="refreshProduct(${product.Id})" title="Cập nhật từ TPOS">🔄</button>
                                 <div class="grid-stat-label">📦 Tổng</div>
                                 <div class="grid-stat-value">${product.QtyAvailable || 0}</div>
                             </div>
@@ -943,6 +944,7 @@
         async function refreshProduct(productId) {
             const btnRefresh = event.target;
             const gridItem = btnRefresh.closest('.grid-item');
+            const statTotal = btnRefresh.closest('.grid-stat-total');
 
             // Disable button and add loading animation
             btnRefresh.classList.add('loading');
@@ -995,9 +997,9 @@
                 });
 
                 // Visual feedback
-                gridItem.style.backgroundColor = '#e8f5e9';
+                statTotal.style.background = 'linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%)';
                 setTimeout(() => {
-                    gridItem.style.backgroundColor = '';
+                    statTotal.style.background = '';
                 }, 500);
 
             } catch (error) {
@@ -1005,9 +1007,9 @@
                 alert('Lỗi khi cập nhật sản phẩm: ' + error.message);
 
                 // Visual error feedback
-                gridItem.style.backgroundColor = '#ffebee';
+                statTotal.style.background = 'linear-gradient(135deg, #ffcdd2 0%, #ef9a9a 100%)';
                 setTimeout(() => {
-                    gridItem.style.backgroundColor = '';
+                    statTotal.style.background = '';
                 }, 500);
             } finally {
                 // Re-enable button and remove loading animation
