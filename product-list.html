@@ -357,7 +357,30 @@
     <script>
         let savedProducts = [];
         let currentPage = 1;
-        const itemsPerPage = 8;
+        let itemsPerPage = 8;
+        let displaySettings = {
+            columns: 4,
+            rows: 2,
+            gap: 15
+        };
+
+        // Load settings from localStorage
+        function loadSettings() {
+            const saved = localStorage.getItem('displaySettings');
+            if (saved) {
+                displaySettings = JSON.parse(saved);
+                itemsPerPage = displaySettings.itemsPerPage || (displaySettings.columns * displaySettings.rows);
+            }
+            applySettings();
+        }
+
+        // Apply settings to grid
+        function applySettings() {
+            const productGrid = document.getElementById('productGrid');
+            productGrid.style.gridTemplateColumns = `repeat(${displaySettings.columns}, 1fr)`;
+            productGrid.style.gridTemplateRows = `repeat(${displaySettings.rows}, 1fr)`;
+            productGrid.style.gap = `${displaySettings.gap}px`;
+        }
 
         // Load products from localStorage
         function loadProducts() {
@@ -478,11 +501,17 @@
         window.addEventListener('storage', (e) => {
             if (e.key === 'savedProducts') {
                 loadProducts();
+            } else if (e.key === 'displaySettings') {
+                loadSettings();
+                loadProducts();
             }
         });
 
         // Load products on page load
-        window.addEventListener('load', loadProducts);
+        window.addEventListener('load', () => {
+            loadSettings();
+            loadProducts();
+        });
 
         // Refresh every 5 seconds to sync with main page
         setInterval(() => {
@@ -491,6 +520,16 @@
                 const newProducts = JSON.parse(saved);
                 // Only update if there are changes
                 if (JSON.stringify(newProducts) !== JSON.stringify(savedProducts)) {
+                    loadProducts();
+                }
+            }
+
+            // Check for settings changes
+            const savedSettings = localStorage.getItem('displaySettings');
+            if (savedSettings) {
+                const newSettings = JSON.parse(savedSettings);
+                if (JSON.stringify(newSettings) !== JSON.stringify(displaySettings)) {
+                    loadSettings();
                     loadProducts();
                 }
             }

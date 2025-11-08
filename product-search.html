@@ -264,6 +264,88 @@
             100% { transform: rotate(360deg); }
         }
 
+        .settings-section {
+            padding: 30px;
+            background: #fff8e1;
+            border-top: 3px solid #ffc107;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .settings-header h2 {
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .setting-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .setting-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .setting-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .setting-input:focus {
+            border-color: #ff9800;
+            box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
+        }
+
+        .setting-description {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .btn-apply-settings {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .btn-apply-settings:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+        }
+
         .product-list-section {
             padding: 30px;
             background: #f8f9fa;
@@ -420,6 +502,36 @@
         </div>
 
         <div class="product-display" id="productDisplay"></div>
+
+        <div class="settings-section">
+            <div class="settings-header">
+                <h2>⚙️ Cài đặt Hiển thị</h2>
+            </div>
+            <div class="settings-grid">
+                <div class="setting-item">
+                    <label class="setting-label">📊 Số Cột</label>
+                    <input type="number" class="setting-input" id="settingColumns" value="4" min="1" max="8">
+                    <div class="setting-description">Số cột hiển thị trên mỗi trang</div>
+                </div>
+                <div class="setting-item">
+                    <label class="setting-label">📋 Số Hàng</label>
+                    <input type="number" class="setting-input" id="settingRows" value="2" min="1" max="6">
+                    <div class="setting-description">Số hàng hiển thị trên mỗi trang</div>
+                </div>
+                <div class="setting-item">
+                    <label class="setting-label">📏 Khoảng Cách (px)</label>
+                    <input type="number" class="setting-input" id="settingGap" value="15" min="5" max="50">
+                    <div class="setting-description">Khoảng cách giữa các sản phẩm</div>
+                </div>
+                <div class="setting-item">
+                    <label class="setting-label">💾 Áp dụng</label>
+                    <button class="btn-apply-settings" onclick="applySettings()">
+                        ✓ Lưu Cài Đặt
+                    </button>
+                    <div class="setting-description">Áp dụng cho trang danh sách</div>
+                </div>
+            </div>
+        </div>
 
         <div class="product-list-section" id="productListSection" style="display: none;">
             <div class="list-header">
@@ -898,19 +1010,49 @@
             }
         });
 
+        // Settings functions
+        function loadSettings() {
+            const settings = localStorage.getItem('displaySettings');
+            if (settings) {
+                const parsed = JSON.parse(settings);
+                document.getElementById('settingColumns').value = parsed.columns || 4;
+                document.getElementById('settingRows').value = parsed.rows || 2;
+                document.getElementById('settingGap').value = parsed.gap || 15;
+            }
+        }
+
+        function applySettings() {
+            const columns = parseInt(document.getElementById('settingColumns').value) || 4;
+            const rows = parseInt(document.getElementById('settingRows').value) || 2;
+            const gap = parseInt(document.getElementById('settingGap').value) || 15;
+
+            const settings = {
+                columns: columns,
+                rows: rows,
+                gap: gap,
+                itemsPerPage: columns * rows
+            };
+
+            localStorage.setItem('displaySettings', JSON.stringify(settings));
+            showNotificationMessage('💾 Đã lưu cài đặt thành công!');
+        }
+
         // Pre-load Excel data on page load
         window.addEventListener('load', async () => {
             // Lấy token trước khi load data
             try {
                 await getValidToken();
                 await loadExcelData();
-                
+
                 // Load saved products from localStorage
                 const saved = localStorage.getItem('savedProducts');
                 if (saved) {
                     savedProducts = JSON.parse(saved);
                     updateProductListPreview();
                 }
+
+                // Load display settings
+                loadSettings();
             } catch (error) {
                 console.error('Lỗi khởi tạo:', error);
                 alert('Không thể kết nối đến hệ thống. Vui lòng thử lại sau.');
