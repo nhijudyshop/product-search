@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Danh sách Sản phẩm - N2Shop</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
     <style>
         * {
             margin: 0;
@@ -424,6 +429,25 @@
             nameMargin: 3
         };
 
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD2izLYXLYWR8RtsIS7vvQWroPPtxi_50A",
+            authDomain: "product-s-98d2c.firebaseapp.com",
+            databaseURL: "https://product-s-98d2c-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "product-s-98d2c",
+            storageBucket: "product-s-98d2c.firebasestorage.app",
+            messagingSenderId: "692514176406",
+            appId: "1:692514176406:web:429fb683b8905e10e131b7",
+            measurementId: "G-MXT4TJK349"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Firebase sync flag to prevent loops
+        let isSyncingFromFirebase = false;
+
         // Load settings from localStorage
         function loadSettings() {
             const saved = localStorage.getItem('displaySettings');
@@ -629,19 +653,56 @@
             });
         });
 
-        // Initialize BroadcastChannel for realtime settings sync
+        // Firebase realtime listeners
+        function setupFirebaseListeners() {
+            // Listen for displaySettings changes from Firebase (other devices)
+            database.ref('displaySettings').on('value', (snapshot) => {
+                const settings = snapshot.val();
+                if (settings && !isSyncingFromFirebase) {
+                    isSyncingFromFirebase = true;
+                    displaySettings = settings;
+                    itemsPerPage = settings.itemsPerPage || (settings.columns * settings.rows);
+                    localStorage.setItem('displaySettings', JSON.stringify(settings));
+                    applySettings();
+                    updateProductGrid();
+                    console.log('🔥 Settings synced from Firebase');
+                    setTimeout(() => { isSyncingFromFirebase = false; }, 100);
+                }
+            });
+
+            // Listen for savedProducts changes from Firebase (other devices)
+            database.ref('savedProducts').on('value', (snapshot) => {
+                const products = snapshot.val();
+                if (products && !isSyncingFromFirebase) {
+                    isSyncingFromFirebase = true;
+                    savedProducts = products;
+                    localStorage.setItem('savedProducts', JSON.stringify(products));
+
+                    if (savedProducts.length === 0) {
+                        showEmptyState();
+                    } else {
+                        updateProductGrid();
+                    }
+
+                    console.log('🔥 Products synced from Firebase:', products.length, 'items');
+                    setTimeout(() => { isSyncingFromFirebase = false; }, 100);
+                }
+            });
+        }
+
+        // Initialize BroadcastChannel for realtime settings sync (same device, different tabs)
         const settingsChannel = new BroadcastChannel('product-settings');
 
-        // Listen for settings changes in realtime
+        // Listen for settings changes in realtime (same device)
         settingsChannel.onmessage = (event) => {
             if (event.data.type === 'settingsChanged') {
-                console.log('⚙️ Settings updated in realtime!');
+                console.log('⚙️ Settings updated from same device!');
                 loadSettings();
                 updateProductGrid();
             }
         };
 
-        // Auto-refresh when localStorage changes (from other tab)
+        // Auto-refresh when localStorage changes (from other tab on same device)
         window.addEventListener('storage', (e) => {
             if (e.key === 'savedProducts') {
                 loadProducts();
@@ -653,21 +714,12 @@
 
         // Load products on page load
         window.addEventListener('load', () => {
+            // Setup Firebase realtime listeners
+            setupFirebaseListeners();
+
             loadSettings();
             loadProducts();
         });
-
-        // Refresh products every 2 seconds to sync with main page
-        setInterval(() => {
-            const saved = localStorage.getItem('savedProducts');
-            if (saved) {
-                const newProducts = JSON.parse(saved);
-                // Only update if there are changes
-                if (JSON.stringify(newProducts) !== JSON.stringify(savedProducts)) {
-                    loadProducts();
-                }
-            }
-        }, 2000);
     </script>
 </body>
 </html>

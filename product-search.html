@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý Sản phẩm - N2Shop</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
     <style>
         * {
             margin: 0;
@@ -666,6 +671,25 @@
         let tokenExpiry = null;
         let savedProducts = []; // Danh sách sản phẩm đã thêm
 
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD2izLYXLYWR8RtsIS7vvQWroPPtxi_50A",
+            authDomain: "product-s-98d2c.firebaseapp.com",
+            databaseURL: "https://product-s-98d2c-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "product-s-98d2c",
+            storageBucket: "product-s-98d2c.firebasestorage.app",
+            messagingSenderId: "692514176406",
+            appId: "1:692514176406:web:429fb683b8905e10e131b7",
+            measurementId: "G-MXT4TJK349"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Firebase sync flag to prevent loops
+        let isSyncingFromFirebase = false;
+
         // Authentication functions
         async function getAuthToken() {
             try {
@@ -977,7 +1001,7 @@
         function addProductToList(product, showNotification = true) {
             // Kiểm tra xem sản phẩm đã tồn tại chưa
             const existingIndex = savedProducts.findIndex(p => p.Id === product.Id);
-            
+
             if (existingIndex !== -1) {
                 // Cập nhật số lượng nếu đã tồn tại
                 savedProducts[existingIndex] = product;
@@ -986,12 +1010,19 @@
                 savedProducts.push(product);
             }
 
-            // Lưu vào localStorage
+            // Lưu vào localStorage (local cache)
             localStorage.setItem('savedProducts', JSON.stringify(savedProducts));
+
+            // Sync lên Firebase (chia sẻ giữa các máy)
+            if (!isSyncingFromFirebase) {
+                database.ref('savedProducts').set(savedProducts).catch(error => {
+                    console.error('❌ Lỗi sync products lên Firebase:', error);
+                });
+            }
 
             // Cập nhật UI
             updateProductListPreview();
-            
+
             // Hiển thị notification nếu được yêu cầu
             if (showNotification) {
                 showNotificationMessage('✅ Đã thêm sản phẩm vào danh sách');
@@ -1043,7 +1074,17 @@
         function removeProduct(productId) {
             if (confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
                 savedProducts = savedProducts.filter(p => p.Id !== productId);
+
+                // Lưu vào localStorage (local cache)
                 localStorage.setItem('savedProducts', JSON.stringify(savedProducts));
+
+                // Sync lên Firebase (chia sẻ giữa các máy)
+                if (!isSyncingFromFirebase) {
+                    database.ref('savedProducts').set(savedProducts).catch(error => {
+                        console.error('❌ Lỗi sync products lên Firebase:', error);
+                    });
+                }
+
                 updateProductListPreview();
                 showNotificationMessage('🗑️ Đã xóa sản phẩm');
             }
@@ -1155,9 +1196,17 @@
                 itemsPerPage: columns * rows
             };
 
+            // Lưu vào localStorage (local cache)
             localStorage.setItem('displaySettings', JSON.stringify(settings));
 
-            // Broadcast settings change to other tabs/windows
+            // Sync lên Firebase (chia sẻ giữa các máy)
+            if (!isSyncingFromFirebase) {
+                database.ref('displaySettings').set(settings).catch(error => {
+                    console.error('❌ Lỗi sync settings lên Firebase:', error);
+                });
+            }
+
+            // Broadcast settings change to other tabs/windows (cùng máy)
             if (window.settingsChannel) {
                 window.settingsChannel.postMessage({ type: 'settingsChanged', settings: settings });
             }
@@ -1168,12 +1217,48 @@
         // Initialize BroadcastChannel for settings sync
         window.settingsChannel = new BroadcastChannel('product-settings');
 
+        // Firebase realtime listeners
+        function setupFirebaseListeners() {
+            // Listen for displaySettings changes from other devices
+            database.ref('displaySettings').on('value', (snapshot) => {
+                const settings = snapshot.val();
+                if (settings && !isSyncingFromFirebase) {
+                    isSyncingFromFirebase = true;
+                    localStorage.setItem('displaySettings', JSON.stringify(settings));
+                    console.log('🔥 Settings synced from Firebase');
+
+                    // Broadcast to other tabs on same device
+                    if (window.settingsChannel) {
+                        window.settingsChannel.postMessage({ type: 'settingsChanged', settings: settings });
+                    }
+
+                    setTimeout(() => { isSyncingFromFirebase = false; }, 100);
+                }
+            });
+
+            // Listen for savedProducts changes from other devices
+            database.ref('savedProducts').on('value', (snapshot) => {
+                const products = snapshot.val();
+                if (products && !isSyncingFromFirebase) {
+                    isSyncingFromFirebase = true;
+                    savedProducts = products;
+                    localStorage.setItem('savedProducts', JSON.stringify(products));
+                    updateProductListPreview();
+                    console.log('🔥 Products synced from Firebase:', products.length, 'items');
+                    setTimeout(() => { isSyncingFromFirebase = false; }, 100);
+                }
+            });
+        }
+
         // Pre-load Excel data on page load
         window.addEventListener('load', async () => {
             // Lấy token trước khi load data
             try {
                 await getValidToken();
                 await loadExcelData();
+
+                // Setup Firebase realtime listeners
+                setupFirebaseListeners();
 
                 // Load saved products from localStorage
                 const saved = localStorage.getItem('savedProducts');
