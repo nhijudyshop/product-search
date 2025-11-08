@@ -668,6 +668,13 @@
             updateProductGrid();
             updateHashUrl(); // Update URL hash
 
+            // Sync current page to Firebase if in admin mode
+            if (isAdminMode && !isSyncingFromFirebase) {
+                database.ref('adminCurrentPage').set(currentPage).catch(error => {
+                    console.error('❌ Lỗi sync page lên Firebase:', error);
+                });
+            }
+
             // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -820,6 +827,35 @@
                     setTimeout(() => { isSyncingFromFirebase = false; }, 100);
                 }
             });
+
+            // Listen for adminCurrentPage changes from Firebase (other devices) - only in admin mode
+            database.ref('adminCurrentPage').on('value', (snapshot) => {
+                const page = snapshot.val();
+
+                // Only sync if:
+                // 1. We're in admin mode
+                // 2. Page value exists
+                // 3. We're not currently syncing (to prevent loops)
+                // 4. The page is different from current page
+                if (isAdminMode && page && !isSyncingFromFirebase && page !== currentPage) {
+                    isSyncingFromFirebase = true;
+
+                    const totalPages = Math.ceil(savedProducts.length / itemsPerPage);
+
+                    // Validate page number
+                    if (page >= 1 && page <= totalPages) {
+                        currentPage = page;
+                        updateProductGrid();
+                        updateHashUrl();
+                        console.log('🔥 Admin page synced from Firebase: page', page);
+
+                        // Scroll to top
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+
+                    setTimeout(() => { isSyncingFromFirebase = false; }, 100);
+                }
+            });
         }
 
         // Initialize BroadcastChannel for realtime settings sync (same device, different tabs)
@@ -847,10 +883,18 @@
         // Handle hash change (when user navigates back/forward or URL changes)
         window.addEventListener('hashchange', () => {
             const params = parseHashParams();
+            const wasAdminMode = isAdminMode;
 
             // Update admin mode
             if (params.admin !== undefined) {
                 isAdminMode = params.admin;
+            }
+
+            // If just entered admin mode, sync current page to Firebase
+            if (isAdminMode && !wasAdminMode) {
+                database.ref('adminCurrentPage').set(currentPage).catch(error => {
+                    console.error('❌ Lỗi sync page khi vào admin mode:', error);
+                });
             }
 
             // Update current page
@@ -859,12 +903,26 @@
                 if (params.page >= 1 && params.page <= totalPages) {
                     currentPage = params.page;
                     updateProductGrid();
+
+                    // Sync to Firebase if in admin mode
+                    if (isAdminMode && !isSyncingFromFirebase) {
+                        database.ref('adminCurrentPage').set(currentPage).catch(error => {
+                            console.error('❌ Lỗi sync page từ hash change:', error);
+                        });
+                    }
                 }
             } else {
                 // If no page in hash, reset to page 1
                 if (currentPage !== 1) {
                     currentPage = 1;
                     updateProductGrid();
+
+                    // Sync to Firebase if in admin mode
+                    if (isAdminMode && !isSyncingFromFirebase) {
+                        database.ref('adminCurrentPage').set(currentPage).catch(error => {
+                            console.error('❌ Lỗi sync page reset:', error);
+                        });
+                    }
                 }
             }
         });
@@ -893,6 +951,13 @@
 
             // Update hash URL to reflect current state
             updateHashUrl();
+
+            // Sync initial page to Firebase if in admin mode
+            if (isAdminMode) {
+                database.ref('adminCurrentPage').set(currentPage).catch(error => {
+                    console.error('❌ Lỗi sync initial page lên Firebase:', error);
+                });
+            }
         });
     </script>
 </body>
