@@ -357,9 +357,58 @@
             border: 2px solid #f5c6cb;
         }
 
-        @media (max-width: 768px) {
+        /* ===== RESPONSIVE CSS - MOBILE & TABLET ===== */
+
+        /* Điện thoại nhỏ (Small phones) - < 480px */
+        @media (max-width: 479px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px 15px;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .header p {
+                font-size: 0.85em;
+            }
+
+            .btn-settings {
+                top: 10px;
+                right: 10px;
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+
+            .settings-text {
+                display: none;
+            }
+
+            .settings-icon {
+                font-size: 18px;
+            }
+
+            .search-section {
+                padding: 20px 15px;
+            }
+
+            .search-input {
+                padding: 12px 15px;
+                font-size: 14px;
+            }
+
+            .product-display {
+                padding: 15px;
+            }
+
             .product-card {
                 flex-direction: column;
+                gap: 15px;
+                padding: 15px;
             }
 
             .product-image img,
@@ -369,8 +418,28 @@
                 aspect-ratio: 1;
             }
 
+            .product-name {
+                font-size: 18px;
+                margin-bottom: 15px;
+                padding-bottom: 15px;
+            }
+
             .product-stats {
                 grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .stat-box {
+                padding: 15px;
+            }
+
+            .stat-label {
+                font-size: 12px;
+            }
+
+            .stat-value,
+            .stat-input {
+                font-size: 24px;
             }
 
             .settings-sidebar {
@@ -378,10 +447,64 @@
                 right: -100%;
             }
 
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-item {
+                grid-template-columns: 60px 1fr;
+                gap: 10px;
+                padding: 12px;
+            }
+
+            .preview-image {
+                width: 60px;
+                height: 60px;
+            }
+
+            .preview-name {
+                font-size: 13px;
+            }
+
+            .preview-stats {
+                flex-direction: column;
+                gap: 8px;
+                font-size: 12px;
+            }
+
+            .qty-control {
+                padding: 3px 6px;
+            }
+
+            .qty-btn {
+                width: 20px;
+                height: 20px;
+                font-size: 14px;
+            }
+
+            .btn-remove {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+        }
+
+        /* Điện thoại (Phones) - 480px to 767px */
+        @media (min-width: 480px) and (max-width: 767px) {
+            body {
+                padding: 15px;
+            }
+
+            .header {
+                padding: 25px 20px;
+            }
+
+            .header h1 {
+                font-size: 1.75em;
+            }
+
             .btn-settings {
-                position: absolute;
-                top: 15px;
-                right: 15px;
+                top: 12px;
+                right: 12px;
                 padding: 8px 15px;
                 font-size: 12px;
             }
@@ -392,6 +515,150 @@
 
             .settings-icon {
                 font-size: 20px;
+            }
+
+            .search-section {
+                padding: 25px 20px;
+            }
+
+            .search-input {
+                padding: 14px 18px;
+                font-size: 15px;
+            }
+
+            .product-display {
+                padding: 20px;
+            }
+
+            .product-card {
+                flex-direction: column;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .product-image img,
+            .product-image .no-image {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 1;
+            }
+
+            .product-name {
+                font-size: 20px;
+            }
+
+            .product-stats {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .stat-value,
+            .stat-input {
+                font-size: 28px;
+            }
+
+            .settings-sidebar {
+                width: 100%;
+                right: -100%;
+            }
+
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Tablet dọc (Portrait tablets) - 768px to 1024px */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            .container {
+                max-width: 100%;
+            }
+
+            .header h1 {
+                font-size: 1.85em;
+            }
+
+            .btn-settings {
+                padding: 10px 18px;
+                font-size: 13px;
+            }
+
+            .search-section {
+                padding: 28px;
+            }
+
+            .product-display {
+                padding: 25px;
+            }
+
+            .product-card {
+                gap: 25px;
+            }
+
+            .product-image img,
+            .product-image .no-image {
+                width: 250px;
+                height: 250px;
+            }
+
+            .product-name {
+                font-size: 22px;
+            }
+
+            .product-stats {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
+            }
+
+            .stat-value,
+            .stat-input {
+                font-size: 28px;
+            }
+
+            .settings-sidebar {
+                width: 380px;
+            }
+
+            .settings-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .preview-item {
+                grid-template-columns: 70px 1fr auto;
+            }
+
+            .preview-image {
+                width: 70px;
+                height: 70px;
+            }
+        }
+
+        /* Tablet ngang (Landscape tablets) - 768px+ and landscape */
+        @media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+            .product-card {
+                flex-direction: row;
+            }
+
+            .product-image img,
+            .product-image .no-image {
+                width: 220px;
+                height: 220px;
+            }
+
+            .product-stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Desktop nhỏ - 1025px to 1366px */
+        @media (min-width: 1025px) and (max-width: 1366px) {
+            .container {
+                max-width: 1100px;
+            }
+
+            .product-image img,
+            .product-image .no-image {
+                width: 280px;
+                height: 280px;
             }
         }
 
@@ -647,24 +914,6 @@
 
         .btn-remove:hover {
             background: #c82333;
-        }
-
-
-        @media (max-width: 768px) {
-            .product-card {
-                flex-direction: column;
-            }
-
-            .product-image img,
-            .product-image .no-image {
-                width: 100%;
-                height: auto;
-                aspect-ratio: 1;
-            }
-
-            .product-stats {
-                grid-template-columns: 1fr;
-            }
         }
     </style>
 </head>
