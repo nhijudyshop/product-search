@@ -275,6 +275,58 @@
             right: 10px;
         }
 
+        /* Sync Toggle Button */
+        .btn-sync-toggle {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.2);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .btn-sync-toggle.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: white;
+        }
+
+        .btn-sync-toggle:hover,
+        .btn-sync-toggle.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translateX(-50%) scale(1.05);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .sync-hover-area {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            z-index: 999;
+        }
+
+        .sync-hover-area:hover ~ .btn-sync-toggle {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
         .page-info {
             position: fixed;
             bottom: 10px;
@@ -471,6 +523,11 @@
     <button class="btn-nav" id="btnPrev">◀ Trước</button>
     <div class="nav-hover-area right"></div>
     <button class="btn-nav" id="btnNext">Sau ▶</button>
+
+    <!-- Sync Toggle Button -->
+    <div class="sync-hover-area"></div>
+    <button class="btn-sync-toggle" id="btnToggleSync" onclick="toggleSyncMode()">⏸️ Đồng bộ</button>
+
     <span class="page-info" id="pageInfo">Trang 1/1</span>
 
     <script>
@@ -484,7 +541,7 @@
             itemHeight: 500,
             nameMargin: 3
         };
-        let isAdminMode = false;
+        let isSyncMode = false; // Sync mode flag (renamed from isAdminMode)
 
         // Firebase Configuration
         const firebaseConfig = {
@@ -505,6 +562,36 @@
         // Firebase sync flag to prevent loops
         let isSyncingFromFirebase = false;
 
+        // Toggle sync mode on/off
+        function toggleSyncMode() {
+            isSyncMode = !isSyncMode;
+            updateHashUrl();
+            updateSyncToggleButton();
+
+            // Sync current page to Firebase if entering sync mode
+            if (isSyncMode) {
+                database.ref('syncCurrentPage').set(currentPage).catch(error => {
+                    console.error('❌ Lỗi sync page:', error);
+                });
+            }
+
+            console.log(isSyncMode ? '🔄 Đã bật chế độ đồng bộ' : '⏸️ Đã tắt chế độ đồng bộ');
+        }
+
+        // Update sync toggle button state
+        function updateSyncToggleButton() {
+            const btnToggle = document.getElementById('btnToggleSync');
+            if (btnToggle) {
+                if (isSyncMode) {
+                    btnToggle.classList.add('active');
+                    btnToggle.textContent = '🔄 Đang đồng bộ';
+                } else {
+                    btnToggle.classList.remove('active');
+                    btnToggle.textContent = '⏸️ Đồng bộ';
+                }
+            }
+        }
+
         // Parse hash parameters from URL
         function parseHashParams() {
             const hash = window.location.hash.substring(1); // Remove #
@@ -512,12 +599,12 @@
 
             if (!hash) return params;
 
-            // Check if hash contains 'admin'
-            if (hash.includes('admin')) {
-                params.admin = true;
+            // Check if hash contains 'sync' (or legacy 'admin' for backward compatibility)
+            if (hash.includes('sync') || hash.includes('admin')) {
+                params.sync = true;
             }
 
-            // Parse page number from hash like 'admin&page=2' or 'page=2'
+            // Parse page number from hash like 'sync&page=2' or 'page=2'
             const pageMatch = hash.match(/page=(\d+)/);
             if (pageMatch) {
                 params.page = parseInt(pageMatch[1]);
@@ -530,8 +617,8 @@
         function updateHashUrl() {
             const parts = [];
 
-            if (isAdminMode) {
-                parts.push('admin');
+            if (isSyncMode) {
+                parts.push('sync');
             }
 
             if (currentPage > 1) {
@@ -668,9 +755,9 @@
             updateProductGrid();
             updateHashUrl(); // Update URL hash
 
-            // Sync current page to Firebase if in admin mode
-            if (isAdminMode && !isSyncingFromFirebase) {
-                database.ref('adminCurrentPage').set(currentPage).catch(error => {
+            // Sync current page to Firebase if in sync mode
+            if (isSyncMode && !isSyncingFromFirebase) {
+                database.ref('syncCurrentPage').set(currentPage).catch(error => {
                     console.error('❌ Lỗi sync page lên Firebase:', error);
                 });
             }
@@ -828,16 +915,16 @@
                 }
             });
 
-            // Listen for adminCurrentPage changes from Firebase (other devices) - only in admin mode
-            database.ref('adminCurrentPage').on('value', (snapshot) => {
+            // Listen for syncCurrentPage changes from Firebase (other devices) - only in sync mode
+            database.ref('syncCurrentPage').on('value', (snapshot) => {
                 const page = snapshot.val();
 
                 // Only sync if:
-                // 1. We're in admin mode
+                // 1. We're in sync mode
                 // 2. Page value exists
                 // 3. We're not currently syncing (to prevent loops)
                 // 4. The page is different from current page
-                if (isAdminMode && page && !isSyncingFromFirebase && page !== currentPage) {
+                if (isSyncMode && page && !isSyncingFromFirebase && page !== currentPage) {
                     isSyncingFromFirebase = true;
 
                     const totalPages = Math.ceil(savedProducts.length / itemsPerPage);
@@ -847,7 +934,7 @@
                         currentPage = page;
                         updateProductGrid();
                         updateHashUrl();
-                        console.log('🔥 Admin page synced from Firebase: page', page);
+                        console.log('🔥 Sync page synced from Firebase: page', page);
 
                         // Scroll to top
                         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -883,17 +970,22 @@
         // Handle hash change (when user navigates back/forward or URL changes)
         window.addEventListener('hashchange', () => {
             const params = parseHashParams();
-            const wasAdminMode = isAdminMode;
+            const wasSyncMode = isSyncMode;
 
-            // Update admin mode
-            if (params.admin !== undefined) {
-                isAdminMode = params.admin;
+            // Update sync mode
+            if (params.sync !== undefined) {
+                isSyncMode = params.sync;
+            } else {
+                isSyncMode = false;
             }
 
-            // If just entered admin mode, sync current page to Firebase
-            if (isAdminMode && !wasAdminMode) {
-                database.ref('adminCurrentPage').set(currentPage).catch(error => {
-                    console.error('❌ Lỗi sync page khi vào admin mode:', error);
+            // Update toggle button state
+            updateSyncToggleButton();
+
+            // If just entered sync mode, sync current page to Firebase
+            if (isSyncMode && !wasSyncMode) {
+                database.ref('syncCurrentPage').set(currentPage).catch(error => {
+                    console.error('❌ Lỗi sync page khi vào sync mode:', error);
                 });
             }
 
@@ -904,9 +996,9 @@
                     currentPage = params.page;
                     updateProductGrid();
 
-                    // Sync to Firebase if in admin mode
-                    if (isAdminMode && !isSyncingFromFirebase) {
-                        database.ref('adminCurrentPage').set(currentPage).catch(error => {
+                    // Sync to Firebase if in sync mode
+                    if (isSyncMode && !isSyncingFromFirebase) {
+                        database.ref('syncCurrentPage').set(currentPage).catch(error => {
                             console.error('❌ Lỗi sync page từ hash change:', error);
                         });
                     }
@@ -917,9 +1009,9 @@
                     currentPage = 1;
                     updateProductGrid();
 
-                    // Sync to Firebase if in admin mode
-                    if (isAdminMode && !isSyncingFromFirebase) {
-                        database.ref('adminCurrentPage').set(currentPage).catch(error => {
+                    // Sync to Firebase if in sync mode
+                    if (isSyncMode && !isSyncingFromFirebase) {
+                        database.ref('syncCurrentPage').set(currentPage).catch(error => {
                             console.error('❌ Lỗi sync page reset:', error);
                         });
                     }
@@ -938,9 +1030,9 @@
             // Parse initial hash from URL
             const params = parseHashParams();
 
-            // Set admin mode from hash
-            if (params.admin) {
-                isAdminMode = true;
+            // Set sync mode from hash
+            if (params.sync) {
+                isSyncMode = true;
             }
 
             // Set initial page from hash
@@ -952,9 +1044,12 @@
             // Update hash URL to reflect current state
             updateHashUrl();
 
-            // Sync initial page to Firebase if in admin mode
-            if (isAdminMode) {
-                database.ref('adminCurrentPage').set(currentPage).catch(error => {
+            // Update toggle button state
+            updateSyncToggleButton();
+
+            // Sync initial page to Firebase if in sync mode
+            if (isSyncMode) {
+                database.ref('syncCurrentPage').set(currentPage).catch(error => {
                     console.error('❌ Lỗi sync initial page lên Firebase:', error);
                 });
             }
