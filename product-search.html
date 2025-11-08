@@ -524,6 +524,11 @@
                     <div class="setting-description">Khoảng cách giữa các sản phẩm</div>
                 </div>
                 <div class="setting-item">
+                    <label class="setting-label">📐 Chiều Cao Cột (px)</label>
+                    <input type="number" class="setting-input" id="settingItemHeight" value="500" min="200" max="1000">
+                    <div class="setting-description">Chiều cao của mỗi ô sản phẩm</div>
+                </div>
+                <div class="setting-item">
                     <label class="setting-label">💾 Áp dụng</label>
                     <button class="btn-apply-settings" onclick="applySettings()">
                         ✓ Lưu Cài Đặt
@@ -1018,6 +1023,7 @@
                 document.getElementById('settingColumns').value = parsed.columns || 4;
                 document.getElementById('settingRows').value = parsed.rows || 2;
                 document.getElementById('settingGap').value = parsed.gap || 15;
+                document.getElementById('settingItemHeight').value = parsed.itemHeight || 500;
             }
         }
 
@@ -1025,11 +1031,13 @@
             const columns = parseInt(document.getElementById('settingColumns').value) || 4;
             const rows = parseInt(document.getElementById('settingRows').value) || 2;
             const gap = parseInt(document.getElementById('settingGap').value) || 15;
+            const itemHeight = parseInt(document.getElementById('settingItemHeight').value) || 500;
 
             const settings = {
                 columns: columns,
                 rows: rows,
                 gap: gap,
+                itemHeight: itemHeight,
                 itemsPerPage: columns * rows
             };
 
