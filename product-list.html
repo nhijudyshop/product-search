@@ -154,6 +154,57 @@
             border-color: #4caf50;
         }
 
+        .qty-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        .qty-btn {
+            background: #ff9800;
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            padding: 0;
+            line-height: 1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .qty-btn:hover {
+            background: #f57c00;
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .qty-btn:active {
+            transform: scale(0.95);
+        }
+
+        .qty-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .qty-btn {
+                width: 24px;
+                height: 24px;
+                font-size: 16px;
+            }
+        }
+
         .btn-nav {
             position: fixed;
             top: 50%;
@@ -526,7 +577,7 @@
                     : `<div class="grid-item-image no-image">📦</div>`;
 
                 return `
-                    <div class="grid-item">
+                    <div class="grid-item" data-product-id="${product.Id}">
                         ${imageHtml}
                         <div class="grid-item-name">${product.NameGet}</div>
                         <div class="grid-item-stats">
@@ -537,6 +588,10 @@
                             <div class="grid-stat grid-stat-sold">
                                 <div class="grid-stat-label">🛒 Bán</div>
                                 <div class="grid-stat-value">${product.soldQty || 0}</div>
+                                <div class="qty-controls">
+                                    <button class="qty-btn" onclick="updateProductQty(${product.Id}, -1)" ${product.soldQty <= 0 ? 'disabled' : ''}>−</button>
+                                    <button class="qty-btn" onclick="updateProductQty(${product.Id}, 1)" ${product.soldQty >= product.QtyAvailable ? 'disabled' : ''}>+</button>
+                                </div>
                             </div>
                             <div class="grid-stat grid-stat-remaining">
                                 <div class="grid-stat-label">✅ Còn</div>
@@ -567,6 +622,35 @@
 
             // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Update product quantity
+        function updateProductQty(productId, change) {
+            const product = savedProducts.find(p => p.Id === productId);
+            if (!product) return;
+
+            // Tính số lượng bán mới
+            const newSoldQty = Math.max(0, Math.min(product.QtyAvailable, product.soldQty + change));
+
+            // Nếu không có thay đổi, không làm gì
+            if (newSoldQty === product.soldQty) return;
+
+            // Cập nhật số lượng
+            product.soldQty = newSoldQty;
+            product.remainingQty = product.QtyAvailable - newSoldQty;
+
+            // Lưu vào localStorage (local cache)
+            localStorage.setItem('savedProducts', JSON.stringify(savedProducts));
+
+            // Sync lên Firebase (chia sẻ giữa các máy)
+            if (!isSyncingFromFirebase) {
+                database.ref('savedProducts').set(savedProducts).catch(error => {
+                    console.error('❌ Lỗi sync products lên Firebase:', error);
+                });
+            }
+
+            // Cập nhật UI
+            updateProductGrid();
         }
 
         // Event listeners

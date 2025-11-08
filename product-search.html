@@ -582,6 +582,51 @@
             gap: 15px;
             font-size: 13px;
             color: #666;
+            align-items: center;
+        }
+
+        .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff3e0;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 2px solid #ff9800;
+        }
+
+        .qty-btn {
+            background: #ff9800;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .qty-btn:hover {
+            background: #f57c00;
+            transform: scale(1.1);
+        }
+
+        .qty-btn:active {
+            transform: scale(0.95);
+        }
+
+        .qty-value {
+            font-weight: 600;
+            color: #e65100;
+            min-width: 30px;
+            text-align: center;
         }
 
         .preview-actions {
@@ -1086,7 +1131,7 @@
             const recentProducts = savedProducts.slice(-5).reverse();
 
             productListPreview.innerHTML = recentProducts.map(product => {
-                const imageHtml = product.imageUrl 
+                const imageHtml = product.imageUrl
                     ? `<img src="${product.imageUrl}" class="preview-image" alt="${product.NameGet}">`
                     : `<div class="preview-image no-image">📦</div>`;
 
@@ -1097,7 +1142,11 @@
                             <div class="preview-name">${product.NameGet}</div>
                             <div class="preview-stats">
                                 <span>📦 Tổng: ${product.QtyAvailable}</span>
-                                <span>🛒 Bán: ${product.soldQty}</span>
+                                <div class="qty-control">
+                                    <button class="qty-btn" onclick="updateProductQty(${product.Id}, -1)">−</button>
+                                    <span class="qty-value">${product.soldQty}</span>
+                                    <button class="qty-btn" onclick="updateProductQty(${product.Id}, 1)">+</button>
+                                </div>
                                 <span>✅ Còn: ${product.remainingQty}</span>
                             </div>
                         </div>
@@ -1107,6 +1156,35 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        // Update product quantity
+        function updateProductQty(productId, change) {
+            const product = savedProducts.find(p => p.Id === productId);
+            if (!product) return;
+
+            // Tính số lượng bán mới
+            const newSoldQty = Math.max(0, Math.min(product.QtyAvailable, product.soldQty + change));
+
+            // Nếu không có thay đổi, không làm gì
+            if (newSoldQty === product.soldQty) return;
+
+            // Cập nhật số lượng
+            product.soldQty = newSoldQty;
+            product.remainingQty = product.QtyAvailable - newSoldQty;
+
+            // Lưu vào localStorage (local cache)
+            localStorage.setItem('savedProducts', JSON.stringify(savedProducts));
+
+            // Sync lên Firebase (chia sẻ giữa các máy)
+            if (!isSyncingFromFirebase) {
+                database.ref('savedProducts').set(savedProducts).catch(error => {
+                    console.error('❌ Lỗi sync products lên Firebase:', error);
+                });
+            }
+
+            // Cập nhật UI
+            updateProductListPreview();
         }
 
         // Remove product from list
