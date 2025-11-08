@@ -1190,8 +1190,17 @@
             };
 
             localStorage.setItem('displaySettings', JSON.stringify(settings));
+
+            // Broadcast settings change to other tabs/windows
+            if (window.settingsChannel) {
+                window.settingsChannel.postMessage({ type: 'settingsChanged', settings: settings });
+            }
+
             showNotificationMessage('💾 Đã lưu cài đặt thành công!');
         }
+
+        // Initialize BroadcastChannel for settings sync
+        window.settingsChannel = new BroadcastChannel('product-settings');
 
         // Pre-load Excel data on page load
         window.addEventListener('load', async () => {

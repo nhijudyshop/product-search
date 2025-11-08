@@ -629,6 +629,18 @@
             });
         });
 
+        // Initialize BroadcastChannel for realtime settings sync
+        const settingsChannel = new BroadcastChannel('product-settings');
+
+        // Listen for settings changes in realtime
+        settingsChannel.onmessage = (event) => {
+            if (event.data.type === 'settingsChanged') {
+                console.log('⚙️ Settings updated in realtime!');
+                loadSettings();
+                updateProductGrid();
+            }
+        };
+
         // Auto-refresh when localStorage changes (from other tab)
         window.addEventListener('storage', (e) => {
             if (e.key === 'savedProducts') {
@@ -645,7 +657,7 @@
             loadProducts();
         });
 
-        // Refresh every 5 seconds to sync with main page
+        // Refresh products every 2 seconds to sync with main page
         setInterval(() => {
             const saved = localStorage.getItem('savedProducts');
             if (saved) {
@@ -655,17 +667,7 @@
                     loadProducts();
                 }
             }
-
-            // Check for settings changes
-            const savedSettings = localStorage.getItem('displaySettings');
-            if (savedSettings) {
-                const newSettings = JSON.parse(savedSettings);
-                if (JSON.stringify(newSettings) !== JSON.stringify(displaySettings)) {
-                    loadSettings();
-                    loadProducts();
-                }
-            }
-        }, 5000);
+        }, 2000);
     </script>
 </body>
 </html>
