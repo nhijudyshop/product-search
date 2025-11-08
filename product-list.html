@@ -20,6 +20,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            margin: 0;
+            padding: 0;
         }
 
         .main-content {
@@ -37,21 +39,24 @@
             grid-template-rows: repeat(2, 1fr);
             gap: 15px;
             width: 100%;
-            height: calc(100vh - 30px);
+            height: 100%;
             max-width: 1900px;
+            touch-action: pan-y pinch-zoom;
+            user-select: none;
         }
 
         .grid-item {
             background: white;
             border: 2px solid #e0e0e0;
             border-radius: 12px;
-            padding: 10px;
+            padding: 6px;
             transition: all 0.3s;
             position: relative;
             display: flex;
             flex-direction: column;
-            overflow: visible;
+            overflow: hidden;
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            min-height: 0;
         }
 
         .grid-item:hover {
@@ -62,12 +67,15 @@
 
         .grid-item-image {
             width: 100%;
-            aspect-ratio: 1;
+            height: auto;
+            max-height: 65%;
             object-fit: cover;
+            background: white;
             border-radius: 8px;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             border: 2px solid #667eea;
-            flex-shrink: 0;
+            flex: 1 1 auto;
+            min-height: 0;
         }
 
         .grid-item-image.no-image {
@@ -82,10 +90,10 @@
         .grid-item-name {
             font-weight: 700;
             color: #333;
-            margin-bottom: 8px;
-            font-size: 14px;
-            line-height: 1.3;
-            min-height: 36px;
+            margin-bottom: var(--name-margin, 3px);
+            font-size: 13px;
+            line-height: 1.2;
+            max-height: 32px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -97,29 +105,30 @@
         .grid-item-stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
+            gap: 4px;
             margin-top: auto;
+            flex-shrink: 0;
         }
 
         .grid-stat {
             text-align: center;
-            padding: 6px 4px;
+            padding: 3px 2px;
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             border-radius: 6px;
             border: 2px solid #dee2e6;
         }
 
         .grid-stat-label {
-            font-size: 11px;
+            font-size: 9px;
             color: #666;
             text-transform: uppercase;
-            margin-bottom: 3px;
+            margin-bottom: 1px;
             font-weight: 700;
             letter-spacing: 0.3px;
         }
 
         .grid-stat-value {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 900;
             color: #333;
             line-height: 1;
@@ -152,11 +161,49 @@
             cursor: pointer;
             font-size: 14px;
             font-weight: 700;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             z-index: 1000;
             box-shadow: 0 3px 15px rgba(0,0,0,0.2);
             writing-mode: vertical-rl;
             text-orientation: mixed;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .btn-nav:hover:not(:disabled),
+        .btn-nav.active:not(:disabled) {
+            background: #667eea;
+            color: white;
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .btn-nav:disabled {
+            opacity: 0 !important;
+            visibility: hidden !important;
+            cursor: not-allowed;
+            pointer-events: none !important;
+        }
+
+        /* Vùng hover riêng để kích hoạt nút */
+        .nav-hover-area {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            width: 80px;
+            z-index: 999;
+        }
+
+        .nav-hover-area.left {
+            left: 0;
+        }
+
+        .nav-hover-area.right {
+            right: 0;
         }
 
         #btnPrev {
@@ -165,21 +212,6 @@
 
         #btnNext {
             right: 10px;
-        }
-
-        .btn-nav:hover:not(:disabled) {
-            background: #667eea;
-            color: white;
-            transform: translateY(-50%) scale(1.05);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
-        }
-
-        .btn-nav:disabled {
-            background: rgba(200, 200, 200, 0.5);
-            color: #999;
-            border-color: #ccc;
-            cursor: not-allowed;
-            opacity: 0.5;
         }
 
         .page-info {
@@ -195,6 +227,24 @@
             color: #333;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             z-index: 1000;
+            opacity: 0.15;
+            transition: opacity 0.3s ease;
+        }
+
+        body:hover .page-info,
+        .page-info:hover {
+            opacity: 1;
+        }
+
+        /* Swipe hint for mobile */
+        @media (max-width: 768px) {
+            .page-info::before {
+                content: '← Vuốt để chuyển trang →';
+                display: block;
+                font-size: 10px;
+                color: #667eea;
+                margin-bottom: 2px;
+            }
         }
 
         .empty-state {
@@ -246,7 +296,13 @@
             }
 
             .grid-item {
-                padding: 8px;
+                padding: 6px;
+            }
+
+            /* Ẩn nút navigation và hover areas trên mobile */
+            .btn-nav,
+            .nav-hover-area {
+                display: none !important;
             }
 
             .grid-item-name {
@@ -350,7 +406,9 @@
         <div class="product-grid" id="productGrid"></div>
     </div>
 
+    <div class="nav-hover-area left"></div>
     <button class="btn-nav" id="btnPrev">◀ Trước</button>
+    <div class="nav-hover-area right"></div>
     <button class="btn-nav" id="btnNext">Sau ▶</button>
     <span class="page-info" id="pageInfo">Trang 1/1</span>
 
@@ -362,7 +420,8 @@
             columns: 4,
             rows: 2,
             gap: 15,
-            itemHeight: 500
+            itemHeight: 500,
+            nameMargin: 3
         };
 
         // Load settings from localStorage
@@ -379,8 +438,11 @@
         function applySettings() {
             const productGrid = document.getElementById('productGrid');
             productGrid.style.gridTemplateColumns = `repeat(${displaySettings.columns}, 1fr)`;
-            productGrid.style.gridTemplateRows = `repeat(${displaySettings.rows}, ${displaySettings.itemHeight}px)`;
+            productGrid.style.gridTemplateRows = `repeat(${displaySettings.rows}, 1fr)`;
             productGrid.style.gap = `${displaySettings.gap}px`;
+            
+            // Apply name margin as CSS variable
+            document.documentElement.style.setProperty('--name-margin', `${displaySettings.nameMargin || 3}px`);
         }
 
         // Load products from localStorage
@@ -496,6 +558,75 @@
             } else if (e.key === 'Escape') {
                 window.location.href = 'product-search.html';
             }
+        });
+
+        // Touch/Swipe navigation for mobile and tablet
+        let touchStartX = 0;
+        let touchEndX = 0;
+        let touchStartY = 0;
+        let touchEndY = 0;
+
+        const productGrid = document.getElementById('productGrid');
+
+        productGrid.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        productGrid.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        }, { passive: true });
+
+        function handleSwipe() {
+            const swipeThreshold = 50; // Minimum distance for swipe
+            const horizontalSwipe = Math.abs(touchEndX - touchStartX);
+            const verticalSwipe = Math.abs(touchEndY - touchStartY);
+
+            // Only process if horizontal swipe is dominant
+            if (horizontalSwipe > verticalSwipe && horizontalSwipe > swipeThreshold) {
+                if (touchEndX < touchStartX) {
+                    // Swipe left - next page
+                    changePage('next');
+                } else if (touchEndX > touchStartX) {
+                    // Swipe right - previous page
+                    changePage('prev');
+                }
+            }
+        }
+
+        // Hover areas for showing navigation buttons
+        const hoverAreas = document.querySelectorAll('.nav-hover-area');
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+
+        hoverAreas.forEach(area => {
+            area.addEventListener('mouseenter', () => {
+                if (area.classList.contains('left') && !btnPrev.disabled) {
+                    btnPrev.classList.add('active');
+                } else if (area.classList.contains('right') && !btnNext.disabled) {
+                    btnNext.classList.add('active');
+                }
+            });
+
+            area.addEventListener('mouseleave', () => {
+                btnPrev.classList.remove('active');
+                btnNext.classList.remove('active');
+            });
+        });
+
+        // Keep button visible when hovering over button itself
+        [btnPrev, btnNext].forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                if (!btn.disabled) {
+                    btn.classList.add('active');
+                }
+            });
+
+            btn.addEventListener('mouseleave', () => {
+                btn.classList.remove('active');
+            });
         });
 
         // Auto-refresh when localStorage changes (from other tab)
