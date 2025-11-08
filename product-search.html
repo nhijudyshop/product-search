@@ -750,6 +750,12 @@
             return cleanProduct;
         }
 
+        // Clean array of products - loại bỏ các thuộc tính không hợp lệ
+        function cleanProductsArray(products) {
+            if (!Array.isArray(products)) return [];
+            return products.map(p => cleanProductForFirebase(p));
+        }
+
         // Authentication functions
         async function getAuthToken() {
             try {
@@ -1358,10 +1364,11 @@
                 const products = snapshot.val();
                 if (products && !isSyncingFromFirebase) {
                     isSyncingFromFirebase = true;
-                    savedProducts = products;
-                    localStorage.setItem('savedProducts', JSON.stringify(products));
+                    // Clean products để loại bỏ các key không hợp lệ
+                    savedProducts = cleanProductsArray(products);
+                    localStorage.setItem('savedProducts', JSON.stringify(savedProducts));
                     updateProductListPreview();
-                    console.log('🔥 Products synced from Firebase:', products.length, 'items');
+                    console.log('🔥 Products synced from Firebase:', savedProducts.length, 'items');
                     setTimeout(() => { isSyncingFromFirebase = false; }, 100);
                 }
             });
@@ -1380,7 +1387,8 @@
                 // Load saved products from localStorage
                 const saved = localStorage.getItem('savedProducts');
                 if (saved) {
-                    savedProducts = JSON.parse(saved);
+                    // Clean products để loại bỏ các key không hợp lệ từ dữ liệu cũ
+                    savedProducts = cleanProductsArray(JSON.parse(saved));
                     updateProductListPreview();
                 }
 
