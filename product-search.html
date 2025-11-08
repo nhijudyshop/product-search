@@ -376,253 +376,6 @@
             background: #c82333;
         }
 
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0,0,0,0.95);
-            z-index: 9999;
-            padding: 0;
-            margin: 0;
-        }
-
-        .modal.show {
-            display: block;
-        }
-
-        .modal-content {
-            background: white;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            margin: 0;
-            border-radius: 0;
-        }
-
-        .modal-header {
-            padding: 20px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        .modal-header h2 {
-            margin: 0;
-            font-size: 1.5em;
-        }
-
-        .btn-close {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            font-size: 28px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            line-height: 1;
-        }
-
-        .btn-close:hover {
-            background: rgba(255,255,255,0.3);
-            transform: rotate(90deg);
-        }
-
-        .modal-body {
-            flex: 1;
-            padding: 15px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(2, 1fr);
-            gap: 12px;
-            width: 100%;
-            height: 100%;
-            max-width: 1900px;
-            margin: 0 auto;
-        }
-
-        .grid-item {
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 12px;
-            transition: all 0.3s;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .grid-item:hover {
-            border-color: #667eea;
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
-            transform: translateY(-3px);
-        }
-
-        .grid-item-image {
-            width: 100%;
-            aspect-ratio: 1;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            border: 2px solid #667eea;
-            flex-shrink: 0;
-            max-height: none;
-        }
-
-        .grid-item-image.no-image {
-            background: linear-gradient(135deg, #e0e0e0 0%, #c0c0c0 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            color: #666;
-        }
-
-        .grid-item-name {
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 8px;
-            font-size: 14px;
-            line-height: 1.2;
-            height: 34px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            flex-shrink: 0;
-            text-overflow: ellipsis;
-        }
-
-        .grid-item-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            margin-top: auto;
-        }
-
-        .grid-stat {
-            text-align: center;
-            padding: 6px 4px;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 6px;
-            border: 1px solid #dee2e6;
-        }
-
-        .grid-stat-label {
-            font-size: 10px;
-            color: #666;
-            text-transform: uppercase;
-            margin-bottom: 3px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        .grid-stat-value {
-            font-size: 18px;
-            font-weight: 900;
-            color: #333;
-            line-height: 1;
-        }
-
-        .grid-stat-total {
-            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-            border-color: #2196f3;
-        }
-
-        .grid-stat-sold {
-            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-            border-color: #ff9800;
-        }
-
-        .grid-stat-remaining {
-            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-            border-color: #4caf50;
-        }
-
-        .btn-remove-grid {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: #dc3545;
-            color: white;
-            border: none;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
-            z-index: 10;
-        }
-
-        .btn-remove-grid:hover {
-            background: #c82333;
-            transform: scale(1.1);
-        }
-
-        .modal-footer {
-            padding: 15px 30px;
-            background: #f8f9fa;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 2px solid #e0e0e0;
-            flex-shrink: 0;
-        }
-
-        .btn-nav {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-nav:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-nav:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-
-        .page-info {
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
-        }
 
         @media (max-width: 768px) {
             .product-card {
@@ -638,125 +391,6 @@
 
             .product-stats {
                 grid-template-columns: 1fr;
-            }
-
-            .product-grid {
-                grid-template-columns: repeat(2, 1fr);
-                grid-template-rows: repeat(4, 1fr);
-                gap: 8px;
-            }
-
-            .modal-body {
-                padding: 10px;
-            }
-
-            .grid-item {
-                padding: 8px;
-            }
-
-            .grid-item-name {
-                font-size: 11px;
-                height: 26px;
-                margin-bottom: 6px;
-            }
-
-            .grid-item-image {
-                margin-bottom: 6px;
-            }
-
-            .grid-item-image.no-image {
-                font-size: 32px;
-            }
-
-            .grid-stat {
-                padding: 5px 2px;
-            }
-
-            .grid-stat-label {
-                font-size: 9px;
-                margin-bottom: 2px;
-            }
-
-            .grid-stat-value {
-                font-size: 15px;
-            }
-
-            .modal-footer {
-                flex-direction: column;
-                gap: 10px;
-                padding: 10px 15px;
-            }
-
-            .btn-nav {
-                width: 100%;
-            }
-
-            .modal-header {
-                padding: 15px 20px;
-            }
-
-            .modal-header h2 {
-                font-size: 1.2em;
-            }
-        }
-
-        @media (min-width: 769px) and (max-width: 1200px) {
-            .product-grid {
-                gap: 10px;
-            }
-
-            .modal-body {
-                padding: 12px;
-            }
-
-            .grid-item {
-                padding: 10px;
-            }
-
-            .grid-item-name {
-                font-size: 12px;
-                height: 29px;
-            }
-
-            .grid-stat-value {
-                font-size: 16px;
-            }
-
-            .grid-item-image.no-image {
-                font-size: 40px;
-            }
-        }
-
-        @media (min-width: 1201px) and (max-width: 1600px) {
-            .grid-item-name {
-                font-size: 13px;
-            }
-
-            .grid-stat-value {
-                font-size: 17px;
-            }
-
-            .grid-item-image.no-image {
-                font-size: 44px;
-            }
-        }
-
-        @media (min-width: 1601px) {
-            .grid-item-name {
-                font-size: 15px;
-                height: 36px;
-            }
-
-            .grid-stat-value {
-                font-size: 20px;
-            }
-
-            .grid-stat-label {
-                font-size: 11px;
-            }
-
-            .grid-item-image.no-image {
-                font-size: 56px;
             }
         }
     </style>
@@ -790,29 +424,12 @@
         <div class="product-list-section" id="productListSection" style="display: none;">
             <div class="list-header">
                 <h2>📋 Danh sách sản phẩm đã thêm (<span id="productCount">0</span>)</h2>
-                <button class="btn-expand" id="btnExpandList">🔍 Phóng to</button>
+                <a href="product-list.html" class="btn-expand" target="_blank" style="text-decoration: none; display: inline-block;">🔍 Phóng to</a>
             </div>
             <div class="product-list-preview" id="productListPreview"></div>
         </div>
     </div>
 
-    <!-- Modal hiển thị bảng phóng to -->
-    <div class="modal" id="productModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>📋 Danh sách sản phẩm</h2>
-                <button class="btn-close" id="btnCloseModal">✕</button>
-            </div>
-            <div class="modal-body">
-                <div class="product-grid" id="productGrid"></div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-nav" id="btnPrev">← Trang trước</button>
-                <span class="page-info" id="pageInfo">Trang 1/1</span>
-                <button class="btn-nav" id="btnNext">Trang sau →</button>
-            </div>
-        </div>
-    </div>
 
     <script>
         let productsData = [];
@@ -820,8 +437,6 @@
         let bearerToken = null;
         let tokenExpiry = null;
         let savedProducts = []; // Danh sách sản phẩm đã thêm
-        let currentPage = 1;
-        const itemsPerPage = 8;
 
         // Authentication functions
         async function getAuthToken() {
@@ -1202,7 +817,6 @@
                 savedProducts = savedProducts.filter(p => p.Id !== productId);
                 localStorage.setItem('savedProducts', JSON.stringify(savedProducts));
                 updateProductListPreview();
-                updateModalGrid();
                 showNotificationMessage('🗑️ Đã xóa sản phẩm');
             }
         }
@@ -1232,79 +846,6 @@
             }, 2000);
         }
 
-        // Open modal
-        function openModal() {
-            const modal = document.getElementById('productModal');
-            modal.classList.add('show');
-            currentPage = 1;
-            updateModalGrid();
-        }
-
-        // Close modal
-        function closeModal() {
-            const modal = document.getElementById('productModal');
-            modal.classList.remove('show');
-        }
-
-        // Update modal grid with pagination
-        function updateModalGrid() {
-            const productGrid = document.getElementById('productGrid');
-            const pageInfo = document.getElementById('pageInfo');
-            const btnPrev = document.getElementById('btnPrev');
-            const btnNext = document.getElementById('btnNext');
-
-            const totalPages = Math.ceil(savedProducts.length / itemsPerPage);
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
-            const currentProducts = savedProducts.slice(startIndex, endIndex);
-
-            // Update grid
-            productGrid.innerHTML = currentProducts.map(product => {
-                const imageHtml = product.imageUrl 
-                    ? `<img src="${product.imageUrl}" class="grid-item-image" alt="${product.NameGet}">`
-                    : `<div class="grid-item-image no-image">📦</div>`;
-
-                return `
-                    <div class="grid-item">
-                        <button class="btn-remove-grid" onclick="removeProduct(${product.Id})">✕</button>
-                        ${imageHtml}
-                        <div class="grid-item-name">${product.NameGet}</div>
-                        <div class="grid-item-stats">
-                            <div class="grid-stat grid-stat-total">
-                                <div class="grid-stat-label">📦 Tổng</div>
-                                <div class="grid-stat-value">${product.QtyAvailable}</div>
-                            </div>
-                            <div class="grid-stat grid-stat-sold">
-                                <div class="grid-stat-label">🛒 Bán</div>
-                                <div class="grid-stat-value">${product.soldQty}</div>
-                            </div>
-                            <div class="grid-stat grid-stat-remaining">
-                                <div class="grid-stat-label">✅ Còn</div>
-                                <div class="grid-stat-value">${product.remainingQty}</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            // Update pagination info
-            pageInfo.textContent = `Trang ${currentPage}/${totalPages || 1}`;
-            btnPrev.disabled = currentPage === 1;
-            btnNext.disabled = currentPage >= totalPages;
-        }
-
-        // Change page
-        function changePage(direction) {
-            const totalPages = Math.ceil(savedProducts.length / itemsPerPage);
-            
-            if (direction === 'prev' && currentPage > 1) {
-                currentPage--;
-            } else if (direction === 'next' && currentPage < totalPages) {
-                currentPage++;
-            }
-            
-            updateModalGrid();
-        }
 
         // Event listeners
         document.getElementById('productSearch').addEventListener('input', (e) => {
@@ -1376,18 +917,6 @@
             }
         });
 
-        // Modal event listeners
-        document.getElementById('btnExpandList').addEventListener('click', openModal);
-        document.getElementById('btnCloseModal').addEventListener('click', closeModal);
-        document.getElementById('btnPrev').addEventListener('click', () => changePage('prev'));
-        document.getElementById('btnNext').addEventListener('click', () => changePage('next'));
-
-        // Close modal when clicking outside
-        document.getElementById('productModal').addEventListener('click', (e) => {
-            if (e.target.id === 'productModal') {
-                closeModal();
-            }
-        });
 
         // Add CSS animations
         const style = document.createElement('style');
