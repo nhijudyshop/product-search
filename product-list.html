@@ -484,6 +484,7 @@
             itemHeight: 500,
             nameMargin: 3
         };
+        let isAdminMode = false;
 
         // Firebase Configuration
         const firebaseConfig = {
@@ -503,6 +504,47 @@
 
         // Firebase sync flag to prevent loops
         let isSyncingFromFirebase = false;
+
+        // Parse hash parameters from URL
+        function parseHashParams() {
+            const hash = window.location.hash.substring(1); // Remove #
+            const params = {};
+
+            if (!hash) return params;
+
+            // Check if hash contains 'admin'
+            if (hash.includes('admin')) {
+                params.admin = true;
+            }
+
+            // Parse page number from hash like 'admin&page=2' or 'page=2'
+            const pageMatch = hash.match(/page=(\d+)/);
+            if (pageMatch) {
+                params.page = parseInt(pageMatch[1]);
+            }
+
+            return params;
+        }
+
+        // Update URL hash with current state
+        function updateHashUrl() {
+            const parts = [];
+
+            if (isAdminMode) {
+                parts.push('admin');
+            }
+
+            if (currentPage > 1) {
+                parts.push(`page=${currentPage}`);
+            }
+
+            const newHash = parts.length > 0 ? '#' + parts.join('&') : '';
+
+            // Update URL without triggering page reload
+            if (window.location.hash !== newHash) {
+                window.history.replaceState(null, null, newHash || window.location.pathname);
+            }
+        }
 
         // Load settings from localStorage
         function loadSettings() {
@@ -624,6 +666,7 @@
             }
 
             updateProductGrid();
+            updateHashUrl(); // Update URL hash
 
             // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -801,6 +844,31 @@
             }
         });
 
+        // Handle hash change (when user navigates back/forward or URL changes)
+        window.addEventListener('hashchange', () => {
+            const params = parseHashParams();
+
+            // Update admin mode
+            if (params.admin !== undefined) {
+                isAdminMode = params.admin;
+            }
+
+            // Update current page
+            if (params.page) {
+                const totalPages = Math.ceil(savedProducts.length / itemsPerPage);
+                if (params.page >= 1 && params.page <= totalPages) {
+                    currentPage = params.page;
+                    updateProductGrid();
+                }
+            } else {
+                // If no page in hash, reset to page 1
+                if (currentPage !== 1) {
+                    currentPage = 1;
+                    updateProductGrid();
+                }
+            }
+        });
+
         // Load products on page load
         window.addEventListener('load', () => {
             // Setup Firebase realtime listeners
@@ -808,6 +876,23 @@
 
             loadSettings();
             loadProducts();
+
+            // Parse initial hash from URL
+            const params = parseHashParams();
+
+            // Set admin mode from hash
+            if (params.admin) {
+                isAdminMode = true;
+            }
+
+            // Set initial page from hash
+            if (params.page && params.page > 1) {
+                currentPage = params.page;
+                updateProductGrid();
+            }
+
+            // Update hash URL to reflect current state
+            updateHashUrl();
         });
     </script>
 </body>
