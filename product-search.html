@@ -989,19 +989,25 @@
                 const sold = parseInt(soldInput.value) || 0;
                 const remaining = Math.max(0, qtyAvailable - sold);
                 remainingDisplay.textContent = remaining;
-                
-                // Tự động cập nhật vào danh sách
+
+                // Tự động cập nhật vào danh sách - chỉ pass các field cần thiết
                 addProductToList({
-                    ...product,
+                    Id: product.Id,
+                    NameGet: product.NameGet,
+                    QtyAvailable: product.QtyAvailable,
+                    ProductTmplId: product.ProductTmplId,
                     imageUrl: imageUrl,
                     soldQty: sold,
                     remainingQty: remaining
                 }, false); // false = không hiển thị notification mỗi lần thay đổi
             });
 
-            // Tự động thêm vào danh sách ngay khi hiển thị
+            // Tự động thêm vào danh sách ngay khi hiển thị - chỉ pass các field cần thiết
             addProductToList({
-                ...product,
+                Id: product.Id,
+                NameGet: product.NameGet,
+                QtyAvailable: product.QtyAvailable,
+                ProductTmplId: product.ProductTmplId,
                 imageUrl: imageUrl,
                 soldQty: 0,
                 remainingQty: qtyAvailable
